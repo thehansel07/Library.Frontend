@@ -1,0 +1,112 @@
+<a class="back-link" routerLink="/books"><mat-icon>arrow_back</mat-icon>Volver a libros</a>
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">CATÁLOGO DE LIBROS</p>
+    <h1>{{ title() }}<span class="heading-dot">.</span></h1>
+    <p class="page-description">
+      {{
+        editing
+          ? 'Cada detalle cuenta. Actualiza la información del libro.'
+          : 'Hazle un espacio a la próxima historia de tu biblioteca.'
+      }}
+    </p>
+  </div>
+</section>
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Cargando libro" />
+}
+@if (loadError()) {
+  <div class="error-banner" role="alert">
+    <mat-icon>error_outline</mat-icon><span>{{ loadError() }}</span>
+  </div>
+} @else {
+  <form class="panel form-panel" [formGroup]="form" (ngSubmit)="save()">
+    <div class="form-section-heading">
+      <span class="section-number">01</span>
+      <div>
+        <h2>Información del libro</h2>
+        <p>Los campos con asterisco son obligatorios.</p>
+      </div>
+    </div>
+    <div class="form-grid">
+      <mat-form-field appearance="outline"
+        ><mat-label>Identificador</mat-label
+        ><input
+          matInput
+          type="number"
+          formControlName="id"
+          min="1"
+          step="1"
+          [readonly]="editing"
+        /><mat-hint>{{
+          editing
+            ? 'El identificador no se puede cambiar.'
+            : 'Sugerimos el siguiente identificador disponible.'
+        }}</mat-hint>
+        @if (form.controls.id.hasError('duplicate')) {
+          <mat-error>Ya hay un libro con este identificador.</mat-error>
+        } @else {
+          <mat-error>Usa un número entero mayor que cero.</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline"
+        ><mat-label>Título</mat-label
+        ><input matInput formControlName="title" maxlength="300" autocomplete="off" /><mat-error
+          >Escribe un título de hasta 300 caracteres.</mat-error
+        ></mat-form-field
+      >
+      <mat-form-field class="full-width" appearance="outline"
+        ><mat-label>Descripción</mat-label
+        ><textarea
+          matInput
+          formControlName="description"
+          rows="4"
+          maxlength="12000"
+          placeholder="¿De qué trata este libro?"
+        ></textarea
+        ><mat-hint>Una breve presentación para encontrarlo más fácilmente.</mat-hint
+        ><mat-error>La descripción es demasiado larga.</mat-error></mat-form-field
+      >
+      <mat-form-field appearance="outline"
+        ><mat-label>Número de páginas</mat-label
+        ><input matInput type="number" formControlName="pageCount" min="0" step="1" /><mat-error
+          >Usa un número entero igual o mayor que cero.</mat-error
+        ></mat-form-field
+      >
+      <mat-form-field appearance="outline"
+        ><mat-label>Fecha de publicación</mat-label
+        ><input matInput type="date" formControlName="publishDate" /><mat-error
+          >Selecciona una fecha válida.</mat-error
+        ></mat-form-field
+      >
+      <mat-form-field class="full-width" appearance="outline"
+        ><mat-label>Fragmento</mat-label
+        ><textarea
+          matInput
+          formControlName="excerpt"
+          rows="5"
+          maxlength="20000"
+          placeholder="Un pequeño adelanto de la historia..."
+        ></textarea
+        ><mat-hint>Opcional. Puedes agregar un pasaje o una cita del libro.</mat-hint
+        ><mat-error>El fragmento es demasiado largo.</mat-error></mat-form-field
+      >
+    </div>
+    @if (saveError()) {
+      <div class="error-banner" role="alert">
+        <mat-icon>error_outline</mat-icon><span>{{ saveError() }}</span>
+      </div>
+    }
+    <div class="form-actions">
+      <a mat-button routerLink="/books">Cancelar</a
+      ><button
+        mat-flat-button
+        type="submit"
+        [disabled]="saving() || loading() || (!editing && catalog.books.loading())"
+      >
+        <mat-icon>check</mat-icon
+        >{{ saving() ? 'Guardando...' : editing ? 'Guardar cambios' : 'Agregar libro' }}
+      </button>
+    </div>
+  </form>
+}

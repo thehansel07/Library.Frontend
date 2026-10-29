@@ -1,0 +1,95 @@
+<a class="back-link" routerLink="/books"><mat-icon>arrow_back</mat-icon>Volver a libros</a>
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Cargando detalle del libro" />
+}
+@if (error()) {
+  <app-empty-state icon="auto_stories" title="No pudimos abrir este libro" [message]="error()" />
+}
+@if (book(); as book) {
+  <section class="detail-header">
+    <div>
+      <p class="eyebrow">EN TU BIBLIOTECA / LIB-{{ book.id.toString().padStart(3, '0') }}</p>
+      <h1>{{ book.title || 'Libro sin título' }}</h1>
+      <p class="page-description">Cada libro tiene una historia que contar.</p>
+    </div>
+    <a mat-flat-button [routerLink]="['/books', book.id, 'edit']"
+      ><mat-icon>edit</mat-icon>Editar libro</a
+    >
+  </section>
+  <div class="detail-grid">
+    <aside class="panel book-aside">
+      <app-book-cover class="large-cover" [title]="book.title" [id]="book.id" />
+      <dl class="book-facts">
+        <div>
+          <dt><mat-icon>description</mat-icon>Páginas</dt>
+          <dd>{{ book.pageCount }}</dd>
+        </div>
+        <div>
+          <dt><mat-icon>event</mat-icon>Publicación</dt>
+          <dd>{{ book.publishDate | date: 'd MMM y' : 'UTC' }}</dd>
+        </div>
+        <div>
+          <dt><mat-icon>tag</mat-icon>Identificador</dt>
+          <dd>{{ book.id }}</dd>
+        </div>
+      </dl>
+    </aside>
+    <div class="detail-content">
+      <section class="panel detail-section">
+        <div class="section-heading">
+          <mat-icon>subject</mat-icon>
+          <h2>Acerca del libro</h2>
+        </div>
+        <p class="long-copy">
+          {{ book.description || 'Aún no hay una descripción para este libro.' }}
+        </p>
+      </section>
+      <section class="panel detail-section">
+        <div class="section-heading">
+          <mat-icon>people_outline</mat-icon>
+          <h2>{{ authors().length === 1 ? 'Autor' : 'Autores' }}</h2>
+          <span class="count-badge">{{ authors().length }}</span>
+        </div>
+        @if (catalog.authors.loading()) {
+          <mat-progress-bar mode="indeterminate" aria-label="Cargando autores" />
+        }
+        @if (catalog.authors.error()) {
+          <div class="error-banner" role="alert">
+            <span>{{ catalog.authors.error() }}</span
+            ><button mat-button (click)="catalog.loadAuthors(true)">Reintentar</button>
+          </div>
+        }
+        @for (author of authors(); track author.id) {
+          <a class="detail-author" [routerLink]="['/authors', author.id, 'edit']"
+            ><span class="author-avatar">{{
+              (author.firstName?.charAt(0) || 'A') + (author.lastName?.charAt(0) || '')
+            }}</span
+            ><span
+              ><strong>{{ authorName(author) }}</strong
+              ><small>Ver y editar información</small></span
+            ><mat-icon>arrow_forward</mat-icon></a
+          >
+        }
+        @if (!authors().length && !catalog.authors.loading() && !catalog.authors.error()) {
+          <div class="inline-empty">
+            <p>Este libro todavía no tiene un autor asociado.</p>
+            <a mat-stroked-button routerLink="/authors/new" [queryParams]="{ bookId: book.id }"
+              ><mat-icon>person_add_alt</mat-icon>Agregar autor</a
+            >
+          </div>
+        }
+      </section>
+      <section class="panel detail-section">
+        <div class="section-heading">
+          <mat-icon>format_quote</mat-icon>
+          <h2>Entre sus páginas</h2>
+        </div>
+        @if (book.excerpt) {
+          <blockquote class="book-excerpt">{{ book.excerpt }}</blockquote>
+        } @else {
+          <p class="muted">Aún no se ha agregado un fragmento.</p>
+        }
+      </section>
+    </div>
+  </div>
+}

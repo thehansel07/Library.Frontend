@@ -1,0 +1,13 @@
+<h2 mat-dialog-title>Eliminar {{ data.kind }}</h2>
+<mat-dialog-content>
+  <p>
+    ¿Quieres eliminar <strong>{{ data.name }}</strong> del catálogo?
+  </p>
+  <p class="muted">Esta acción no se puede deshacer durante la sesión.</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button [mat-dialog-close]="false" cdkFocusInitial>Cancelar</button>
+  <button mat-flat-button class="danger-button" [mat-dialog-close]="true">
+    Eliminar {{ data.kind }}
+  </button>
+</mat-dialog-actions>

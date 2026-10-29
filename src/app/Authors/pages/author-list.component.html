@@ -1,0 +1,156 @@
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">QUIENES ESCRIBEN LAS HISTORIAS</p>
+    <h1>Autores<span class="heading-dot">.</span></h1>
+    <p class="page-description">Conoce las voces que forman tu biblioteca.</p>
+  </div>
+  <a mat-flat-button routerLink="/authors/new"><mat-icon>person_add_alt</mat-icon>Agregar autor</a>
+</section>
+<div class="catalog-summary">
+  <span
+    ><strong>{{ catalog.authors.items().length }}</strong> autores registrados</span
+  ><span class="summary-separator"></span
+  ><span><mat-icon>menu_book</mat-icon>Sus libros, conectados</span>
+</div>
+<section class="panel" aria-label="Catálogo de autores">
+  <div class="panel-title">
+    <div>
+      <mat-icon>people_outline</mat-icon>
+      <h2>Todos los autores</h2>
+      <span class="count-badge">{{ filteredAuthors().length }}</span>
+    </div>
+    <button
+      mat-icon-button
+      aria-label="Actualizar autores"
+      matTooltip="Actualizar catálogo"
+      [disabled]="catalog.authors.loading()"
+      (click)="refresh()"
+    >
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+  <div class="list-toolbar">
+    <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic"
+      ><mat-label>Buscar autores</mat-label><mat-icon matPrefix>search</mat-icon
+      ><input
+        matInput
+        #searchInput
+        [value]="query()"
+        (input)="search(searchInput.value)"
+        placeholder="Nombre, apellido o identificador"
+      />
+      @if (query()) {
+        <button mat-icon-button matSuffix aria-label="Limpiar búsqueda" (click)="search('')">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+    <p class="toolbar-hint">Cada historia tiene a alguien detrás.</p>
+  </div>
+  @if (catalog.authors.loading()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Cargando autores" />
+  }
+  @if (catalog.authors.error()) {
+    <div class="error-banner" role="alert">
+      <mat-icon>error_outline</mat-icon><span>{{ catalog.authors.error() }}</span
+      ><button mat-button (click)="catalog.loadAuthors(true)">Reintentar</button>
+    </div>
+  }
+  @if (catalog.books.error()) {
+    <div class="notice-banner" role="status">
+      No pudimos cargar los títulos de los libros.<button
+        mat-button
+        (click)="catalog.loadBooks(true)"
+      >
+        Reintentar
+      </button>
+    </div>
+  }
+  @if (visibleAuthors().length) {
+    <p class="mobile-table-hint"><mat-icon>swipe</mat-icon>Desliza para ver todas las columnas.</p>
+    <div class="table-scroll">
+      <table class="catalog-table author-table">
+        <thead>
+          <tr>
+            <th scope="col">AUTOR</th>
+            <th scope="col">LIBROS</th>
+            <th scope="col" class="linked-book-column">LIBRO ASOCIADO</th>
+            <th scope="col" class="actions-heading">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (author of visibleAuthors(); track author.id) {
+            <tr>
+              <td>
+                <div class="person-cell">
+                  <span
+                    class="author-avatar"
+                    [class.avatar-warm]="author.id % 3 === 0"
+                    [class.avatar-green]="author.id % 3 === 1"
+                    >{{ initials(author) }}</span
+                  >
+                  <div>
+                    <a class="book-title" [routerLink]="['/authors', author.id, 'edit']">{{
+                      authorName(author)
+                    }}</a
+                    ><span class="record-id">AUT-{{ author.id.toString().padStart(3, '0') }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="book-count"
+                  ><mat-icon>menu_book</mat-icon>{{ bookCount(author) }}</span
+                >
+              </td>
+              <td class="linked-book-column">
+                <a class="linked-book" [routerLink]="['/books', author.idBook]"
+                  >{{ bookTitle(author.idBook) }}<mat-icon>north_east</mat-icon></a
+                >
+              </td>
+              <td>
+                <div class="row-actions">
+                  <a
+                    mat-icon-button
+                    [routerLink]="['/authors', author.id, 'edit']"
+                    [attr.aria-label]="'Editar ' + authorName(author)"
+                    matTooltip="Editar autor"
+                    ><mat-icon>edit</mat-icon></a
+                  ><button
+                    mat-icon-button
+                    class="delete-action"
+                    [disabled]="deleting() === author.id"
+                    [attr.aria-label]="'Eliminar ' + authorName(author)"
+                    matTooltip="Eliminar autor"
+                    (click)="remove(author)"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <mat-paginator
+      [length]="filteredAuthors().length"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      (page)="changePage($event)"
+      aria-label="Paginación de autores"
+    />
+  } @else if (!catalog.authors.loading() && !catalog.authors.error()) {
+    <app-empty-state
+      icon="people_outline"
+      [title]="query() ? 'No encontramos ese autor' : 'Todavía no hay autores'"
+      [message]="
+        query() ? 'Prueba con otro nombre o apellido.' : 'Agrega un autor y vincúlalo con su libro.'
+      "
+      [actionLabel]="query() ? 'Limpiar búsqueda' : ''"
+      (action)="search('')"
+    />
+  }
+</section>
+<p class="table-footnote">
+  PRUEBA TECNICA CREADA POR HANSEL CABRERA PARA FINES DE EVALUACION
+</p>

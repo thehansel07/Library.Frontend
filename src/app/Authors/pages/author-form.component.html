@@ -1,0 +1,123 @@
+<a class="back-link" routerLink="/authors"><mat-icon>arrow_back</mat-icon>Volver a autores</a>
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">CATÁLOGO DE AUTORES</p>
+    <h1>{{ editing ? 'Editar autor' : 'Una nueva voz' }}<span class="heading-dot">.</span></h1>
+    <p class="page-description">
+      {{
+        editing
+          ? 'Actualiza los datos del autor y su libro asociado.'
+          : 'Agrega a quien está detrás de la historia.'
+      }}
+    </p>
+  </div>
+</section>
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Cargando autor" />
+}
+@if (loadError()) {
+  <div class="error-banner" role="alert">
+    <mat-icon>error_outline</mat-icon><span>{{ loadError() }}</span>
+  </div>
+} @else {
+  <form class="panel form-panel" [formGroup]="form" (ngSubmit)="save()">
+    <div class="form-section-heading">
+      <span class="section-number">01</span>
+      <div>
+        <h2>Información del autor</h2>
+        <p>Los campos con asterisco son obligatorios.</p>
+      </div>
+    </div>
+    <div class="form-grid">
+      <mat-form-field appearance="outline"
+        ><mat-label>Identificador</mat-label
+        ><input
+          matInput
+          type="number"
+          formControlName="id"
+          min="1"
+          step="1"
+          [readonly]="editing"
+        /><mat-hint>{{
+          editing
+            ? 'El identificador no se puede cambiar.'
+            : 'Sugerimos el siguiente identificador disponible.'
+        }}</mat-hint>
+        @if (form.controls.id.hasError('duplicate')) {
+          <mat-error>Ya hay un autor con este identificador.</mat-error>
+        } @else {
+          <mat-error>Usa un número entero mayor que cero.</mat-error>
+        }
+      </mat-form-field>
+      <div class="form-spacer"></div>
+      <mat-form-field appearance="outline"
+        ><mat-label>Nombre</mat-label
+        ><input
+          matInput
+          formControlName="firstName"
+          maxlength="100"
+          autocomplete="given-name"
+        /><mat-error>Escribe un nombre de hasta 100 caracteres.</mat-error></mat-form-field
+      >
+      <mat-form-field appearance="outline"
+        ><mat-label>Apellido</mat-label
+        ><input
+          matInput
+          formControlName="lastName"
+          maxlength="100"
+          autocomplete="family-name"
+        /><mat-error>Escribe un apellido de hasta 100 caracteres.</mat-error></mat-form-field
+      >
+      <mat-form-field class="full-width" appearance="outline"
+        ><mat-label>Libro asociado</mat-label
+        ><mat-select formControlName="idBook" placeholder="Selecciona un libro"
+          ><mat-option [value]="0" disabled>Selecciona un libro</mat-option>
+          @if (missingBook(); as id) {
+            <mat-option [value]="id">Libro #{{ id }} (fuera del catálogo)</mat-option>
+          }
+          @for (book of sortedBooks(); track book.id) {
+            <mat-option [value]="book.id"
+              >{{ book.title || 'Libro sin título' }} · #{{ book.id }}</mat-option
+            >
+          }</mat-select
+        ><mat-hint>Selecciona el libro al que pertenece esta ficha de autor.</mat-hint
+        ><mat-error>Selecciona un libro.</mat-error></mat-form-field
+      >
+    </div>
+    @if (catalog.books.loading()) {
+      <mat-progress-bar mode="indeterminate" aria-label="Cargando libros disponibles" />
+    }
+    @if (catalog.books.error()) {
+      <div class="error-banner" role="alert">
+        <span>{{ catalog.books.error() }}</span
+        ><button mat-button type="button" (click)="catalog.loadBooks(true)">Reintentar</button>
+      </div>
+    }
+    @if (!catalog.books.loading() && catalog.books.loaded() && !sortedBooks().length) {
+      <div class="notice-banner">
+        Primero necesitas agregar un libro.<a mat-button routerLink="/books/new">Agregar libro</a>
+      </div>
+    }
+    @if (saveError()) {
+      <div class="error-banner" role="alert">
+        <mat-icon>error_outline</mat-icon><span>{{ saveError() }}</span>
+      </div>
+    }
+    <div class="form-actions">
+      <a mat-button routerLink="/authors">Cancelar</a
+      ><button
+        mat-flat-button
+        type="submit"
+        [disabled]="
+          saving() ||
+          loading() ||
+          catalog.books.loading() ||
+          (!editing && catalog.authors.loading())
+        "
+      >
+        <mat-icon>check</mat-icon
+        >{{ saving() ? 'Guardando...' : editing ? 'Guardar cambios' : 'Agregar autor' }}
+      </button>
+    </div>
+  </form>
+}

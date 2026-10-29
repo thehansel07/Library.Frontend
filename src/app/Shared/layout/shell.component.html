@@ -1,0 +1,59 @@
+<a class="skip-link" href="#main-content">Saltar al contenido</a>
+<mat-sidenav-container class="app-frame">
+  <mat-sidenav
+    class="sidebar"
+    [mode]="compact() ? 'over' : 'side'"
+    [opened]="!compact() || menuOpen()"
+    (closedStart)="closeMenu()"
+  >
+    <a class="brand" routerLink="/books" aria-label="Library, ir a libros" (click)="closeMenu()">
+      <span class="brand-mark"><mat-icon>auto_stories</mat-icon></span>
+      <span>Library<span class="brand-caption">UN LUGAR PARA CADA HISTORIA</span></span>
+    </a>
+    <div class="nav-label">BIBLIOTECA</div>
+    <nav aria-label="Navegación principal">
+      <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()"
+        ><mat-icon>menu_book</mat-icon>Libros<mat-icon class="nav-chevron"
+          >chevron_right</mat-icon
+        ></a
+      >
+      <a routerLink="/authors" routerLinkActive="active" (click)="closeMenu()"
+        ><mat-icon>people_outline</mat-icon>Autores<mat-icon class="nav-chevron"
+          >chevron_right</mat-icon
+        ></a
+      >
+    </nav>
+    <div class="sidebar-note">
+      <span class="note-icon"><mat-icon>bookmark_border</mat-icon></span>
+      <h2>Historias bien organizadas.</h2>
+      <p>Libros y sus autores, siempre a mano.</p>
+    </div>
+    <div class="session-note">
+      <mat-icon>info_outline</mat-icon>
+      <p>Catálogo de demostración. Los cambios se conservan hasta recargar esta pestaña.</p>
+    </div>
+    <footer class="sidebar-footer">
+      <span class="profile">LB</span><span>Mi biblioteca<small>Espacio de trabajo</small></span>
+    </footer>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <header class="topbar">
+      @if (compact()) {
+        <button
+          mat-icon-button
+          type="button"
+          aria-label="Abrir navegación"
+          (click)="menuOpen.set(true)"
+        >
+          <mat-icon>menu</mat-icon>
+        </button>
+      }
+      <div class="breadcrumb">
+        <span>Biblioteca</span><mat-icon>chevron_right</mat-icon><strong>{{ section() }}</strong>
+      </div>
+      <div class="topbar-caption"><span class="status-dot"></span>Tu catálogo, en orden</div>
+    </header>
+    <main id="main-content" tabindex="-1"><router-outlet /></main>
+    <footer class="page-footer"><span>Library</span><span>Un libro a la vez.</span></footer>
+  </mat-sidenav-content>
+</mat-sidenav-container>

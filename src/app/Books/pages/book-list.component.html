@@ -1,0 +1,169 @@
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">TU BIBLIOTECA</p>
+    <h1>Libros<span class="heading-dot">.</span></h1>
+    <p class="page-description">Todas tus historias, en un mismo lugar.</p>
+  </div>
+  <a mat-flat-button routerLink="/books/new"><mat-icon>add</mat-icon>Agregar libro</a>
+</section>
+<div class="catalog-summary">
+  <span
+    ><strong>{{ catalog.books.items().length }}</strong> libros en el catálogo</span
+  >
+  <span class="summary-separator"></span>
+  <span><mat-icon>people_outline</mat-icon>{{ linkedBooks() }} con autores asociados</span>
+</div>
+<section class="panel" aria-label="Catálogo de libros">
+  <div class="panel-title">
+    <div>
+      <mat-icon>menu_book</mat-icon>
+      <h2>Todos los libros</h2>
+      <span class="count-badge">{{ filteredBooks().length }}</span>
+    </div>
+    <button
+      mat-icon-button
+      type="button"
+      aria-label="Actualizar catálogo"
+      matTooltip="Actualizar catálogo"
+      [disabled]="catalog.books.loading()"
+      (click)="refresh()"
+    >
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+  <div class="list-toolbar">
+    <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic"
+      ><mat-label>Buscar libros</mat-label><mat-icon matPrefix>search</mat-icon
+      ><input
+        matInput
+        #searchInput
+        [value]="query()"
+        (input)="search(searchInput.value)"
+        placeholder="Título, descripción o autor"
+      />
+      @if (query()) {
+        <button mat-icon-button matSuffix aria-label="Limpiar búsqueda" (click)="search('')">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+    <mat-form-field class="sort-field" appearance="outline" subscriptSizing="dynamic"
+      ><mat-label>Ordenar por</mat-label
+      ><mat-select [value]="sort()" (selectionChange)="sort.set($event.value)"
+        ><mat-option value="title">Título: A–Z</mat-option
+        ><mat-option value="date">Publicación reciente</mat-option
+        ><mat-option value="pages">Más páginas</mat-option></mat-select
+      ></mat-form-field
+    >
+  </div>
+  @if (catalog.books.loading()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Cargando libros" />
+  }
+  @if (catalog.books.error()) {
+    <div class="error-banner" role="alert">
+      <mat-icon>error_outline</mat-icon><span>{{ catalog.books.error() }}</span
+      ><button mat-button (click)="catalog.loadBooks(true)">Reintentar</button>
+    </div>
+  }
+  @if (catalog.authors.error() && !catalog.books.error()) {
+    <div class="notice-banner" role="status">
+      No pudimos cargar los autores. Los libros siguen disponibles.<button
+        mat-button
+        (click)="catalog.loadAuthors(true)"
+      >
+        Reintentar
+      </button>
+    </div>
+  }
+  @if (visibleBooks().length) {
+    <p class="mobile-table-hint"><mat-icon>swipe</mat-icon>Desliza para ver todas las columnas.</p>
+    <div class="table-scroll">
+      <table class="catalog-table book-table">
+        <thead>
+          <tr>
+            <th scope="col">LIBRO</th>
+            <th scope="col" class="author-column">AUTOR</th>
+            <th scope="col" class="date-column">PUBLICACIÓN</th>
+            <th scope="col" class="pages-column">PÁGINAS</th>
+            <th scope="col" class="actions-heading">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (book of visibleBooks(); track book.id) {
+            <tr>
+              <td>
+                <div class="book-cell">
+                  <app-book-cover [title]="book.title" [id]="book.id" />
+                  <div>
+                    <a class="book-title" [routerLink]="['/books', book.id]">{{
+                      book.title || 'Libro sin título'
+                    }}</a>
+                    <p class="book-description">
+                      {{ book.description || 'Este libro todavía no tiene descripción.' }}
+                    </p>
+                    <span class="record-id">LIB-{{ book.id.toString().padStart(3, '0') }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="author-column">
+                <span class="author-text">{{ namesFor(book.id) }}</span>
+              </td>
+              <td class="date-column">
+                <span class="year-pill">{{ book.publishDate | date: 'yyyy' : 'UTC' }}</span>
+              </td>
+              <td class="pages-column">
+                <span class="page-number">{{ book.pageCount }}</span
+                ><span class="unit-label">pág.</span>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <a
+                    mat-icon-button
+                    [routerLink]="['/books', book.id]"
+                    [attr.aria-label]="'Ver detalles de ' + book.title"
+                    matTooltip="Ver detalles"
+                    ><mat-icon>visibility</mat-icon></a
+                  ><a
+                    mat-icon-button
+                    [routerLink]="['/books', book.id, 'edit']"
+                    [attr.aria-label]="'Editar ' + book.title"
+                    matTooltip="Editar"
+                    ><mat-icon>edit</mat-icon></a
+                  ><button
+                    mat-icon-button
+                    class="delete-action"
+                    [disabled]="deleting() === book.id"
+                    [attr.aria-label]="'Eliminar ' + book.title"
+                    matTooltip="Eliminar"
+                    (click)="remove(book)"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <mat-paginator
+      [length]="filteredBooks().length"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      (page)="changePage($event)"
+      aria-label="Paginación de libros"
+    />
+  } @else if (!catalog.books.loading() && !catalog.books.error()) {
+    <app-empty-state
+      icon="auto_stories"
+      [title]="query() ? 'No encontramos ese libro' : 'Tu catálogo está por comenzar'"
+      [message]="
+        query()
+          ? 'Prueba con otro título, autor o palabra clave.'
+          : 'Agrega el primer libro de tu biblioteca.'
+      "
+      [actionLabel]="query() ? 'Limpiar búsqueda' : ''"
+      (action)="search('')"
+    />
+  }
+</section>
