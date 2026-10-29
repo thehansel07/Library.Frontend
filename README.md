@@ -13,7 +13,7 @@ nvm use 22.13.1
 node --version
 ```
 
-Las URLs de repositorio son de ejemplo; hay que reemplazarlas por las reales:
+Las URLs de repositorio son los reales
 
 ```bash
 git clone https://github.com/thehansel07/Library.Frontend
