@@ -16,8 +16,8 @@ node --version
 Las URLs de repositorio son de ejemplo; hay que reemplazarlas por las reales:
 
 ```bash
-git clone https://github.com/tu-organizacion/library-backend.git
-git clone https://github.com/tu-organizacion/library-frontend.git
+git clone https://github.com/thehansel07/Library.Frontend
+git clone https://github.com/thehansel07/Library.Backend
 ```
 
 En esta entrega están separados en `BACKEND/Library` y `FRONTEND/Library`.
